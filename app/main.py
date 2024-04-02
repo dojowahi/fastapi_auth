@@ -6,6 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from authlib.integrations.starlette_client import OAuthError
+from fastapi.responses import JSONResponse
 
 # Create the FastAPI app
 app = FastAPI()
@@ -24,50 +25,37 @@ starlette_config = Config(environ=config_data)
 oauth = OAuth(starlette_config)
 oauth.register(
     name='google',
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile'},
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    client_kwargs={'scope': 'openid email profile','redirect_url': 'https://fastapi-auth-tcoyalueuq-uc.a.run.app/auth'},
 )
 
 # Add session middleware
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
-# Generate a random string for state parameter
-def generate_state():
-    return secrets.token_urlsafe(16)
+
 
 # Login route
 @app.route('/login')
 async def login(request: Request):
     redirect_uri = request.url_for('auth')  # This creates the url for our /auth endpoint
-    # Generate a random state and store it in the session
-    state = generate_state()
-    request.session['oauth_state'] = state
-    return await oauth.google.authorize_redirect(request, redirect_uri, state=state)
+    return await oauth.google.authorize_redirect(request, redirect_uri)
 
 # Auth route
 @app.route('/auth')
 async def auth(request: Request):
-    # Retrieve the stored state from the session
-    stored_state = request.session.get('oauth_state')
-    # Retrieve the state parameter returned by Google
-    state = request.query_params.get('state')
-    if stored_state is None or state != stored_state:
-        # Handle mismatching state error
-        print("Mismatching state error")
-        return RedirectResponse(url='/login')
     
     try:
         token = await oauth.google.authorize_access_token(request)
-        user_data = await oauth.google.parse_id_token(request, token)
-        # Clear the stored state after successful authorization
-        request.session.pop('oauth_state', None)
-        # Store user data in session or handle as needed
-        request.session['user'] = dict(user_data)
-        return RedirectResponse(url='/')
+        # user_data = await oauth.google.parse_id_token(request, token)
+        # Clear the stored state after successful authorization  
     except OAuthError as e:
         # Handle OAuth errors
         print("OAuthError:", e)
         return RedirectResponse(url='/login')  # Redirect to login page or handle error as needed
+    user = token.get('userinfo')
+    if user:
+        request.session['user'] = dict(user)
+    return RedirectResponse(url='/')
 
 # Public route
 @app.get('/')
@@ -77,3 +65,9 @@ def public(request: Request):
         name = user.get('name')
         return f'Hello {name}! <a href="/logout">Logout</a>'
     return '<a href="/login">Login with Google</a>'
+
+@app.get('/logout')
+def logout(request: Request):
+    request.session.pop('user')
+    request.session.clear()
+    return RedirectResponse('/')

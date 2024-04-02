@@ -11,8 +11,8 @@ ENV GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
 ARG GOOGLE_CLIENT_SECRET
 ENV GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
 
-ARG SECRET
-ENV SECRET=$SECRET
+ARG SECRET_KEY
+ENV SECRET_KEY=$SECRET_KEY
 
 # Set working directory
 WORKDIR /app
@@ -27,6 +27,6 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Expose port
-EXPOSE 8000
+EXPOSE 7000
 
-CMD ["uvicorn", "app.run:app", "--host", "0.0.0.0", "--port", "8000", "--forwarded-allow-ips=*"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7000", "--forwarded-allow-ips=*"]

@@ -66,7 +66,3 @@ async def auth(request: Request):
     user_data = await oauth.google.parse_id_token(request, access_token)
     request.session['user'] = dict(user_data)
     return RedirectResponse(url='/')
-
-
-if __name__ == '__main__':
-    uvicorn.run(app, port=8000)

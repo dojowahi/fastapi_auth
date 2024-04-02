@@ -33,7 +33,7 @@ jobs:
           docker build --build-arg GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
                        --build-arg GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
                        --build-arg SECRET=${{ secrets.SECRET }} \
-                      -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fast_gauth:${{ github.sha }}
+                      -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fast_gauth:${{ github.sha }} .
 
       - name: Authenticate Docker to Google Container Registry
         run: gcloud auth configure-docker

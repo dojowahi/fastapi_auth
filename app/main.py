@@ -25,7 +25,7 @@ starlette_config = Config(environ=config_data)
 oauth = OAuth(starlette_config)
 oauth.register(
     name='google',
-    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid email profile','redirect_url': 'https://fastapi-auth-tcoyalueuq-uc.a.run.app/auth'},
 )
 

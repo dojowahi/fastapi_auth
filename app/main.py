@@ -15,8 +15,10 @@ app = FastAPI()
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID') or None
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET') or None
 SECRET_KEY = os.environ.get('SECRET_KEY') or None
+REDIRECT_URL = os.environ.get('REDIRECT_URL') or None
 
-if None in (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SECRET_KEY):
+
+if None in (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SECRET_KEY, REDIRECT_URL):
     raise BaseException('Missing env variables')
 
 # Configure OAuth
@@ -26,7 +28,7 @@ oauth = OAuth(starlette_config)
 oauth.register(
     name='google',
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile','redirect_url': 'https://fastapi-auth-tcoyalueuq-uc.a.run.app/auth'},
+    client_kwargs={'scope': 'openid email profile','redirect_url': REDIRECT_URL},
 )
 
 # Add session middleware

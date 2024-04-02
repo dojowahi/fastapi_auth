@@ -7,6 +7,8 @@ from starlette.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from authlib.integrations.starlette_client import OAuthError
 from fastapi.responses import JSONResponse
+from starlette.responses import HTMLResponse
+
 
 # Create the FastAPI app
 app = FastAPI()
@@ -65,8 +67,8 @@ def public(request: Request):
     user = request.session.get('user')
     if user:
         name = user.get('name')
-        return f'Hello {name}! <a href="/logout">Logout</a>'
-    return '<a href="/login">Login with Google</a>'
+        return HTMLResponse(f'<p>Hello {name}!</p><a href=/logout>Logout</a>')
+    return HTMLResponse('<a href=/login>Login with Google</a>')
 
 @app.get('/logout')
 def logout(request: Request):

@@ -47,6 +47,6 @@ jobs:
           gcloud run deploy fast_gauth \
             --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/fast_gauth:${{ github.sha }} \
             --region us-central1 \
-            --port 8000 \
+            --port 7000 \
             --allow-unauthenticated  \
-            --service-account ${{ secrets.GCP_SA }}
+            --service-account ${{ secrets.GCP_SA_ACCOUNT }}

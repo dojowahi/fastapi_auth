@@ -1,5 +1,6 @@
 import os
-from fastapi import FastAPI, Request, Depends
+import secrets
+from fastapi import FastAPI, Request
 from starlette.config import Config
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
@@ -30,12 +31,16 @@ oauth.register(
 # Add session middleware
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
+# Generate a random string for state parameter
+def generate_state():
+    return secrets.token_urlsafe(16)
+
 # Login route
 @app.route('/login')
 async def login(request: Request):
     redirect_uri = request.url_for('auth')  # This creates the url for our /auth endpoint
     # Generate a random state and store it in the session
-    state = oauth.create_state()
+    state = generate_state()
     request.session['oauth_state'] = state
     return await oauth.google.authorize_redirect(request, redirect_uri, state=state)
 
@@ -44,8 +49,14 @@ async def login(request: Request):
 async def auth(request: Request):
     # Retrieve the stored state from the session
     stored_state = request.session.get('oauth_state')
+    # Retrieve the state parameter returned by Google
+    state = request.query_params.get('state')
+    if stored_state is None or state != stored_state:
+        # Handle mismatching state error
+        print("Mismatching state error")
+        return RedirectResponse(url='/login')
+    
     try:
-        # Validate the state parameter returned by Google
         token = await oauth.google.authorize_access_token(request)
         user_data = await oauth.google.parse_id_token(request, token)
         # Clear the stored state after successful authorization
@@ -54,10 +65,8 @@ async def auth(request: Request):
         request.session['user'] = dict(user_data)
         return RedirectResponse(url='/')
     except OAuthError as e:
-        # Handle OAuth errors, including mismatching_state
+        # Handle OAuth errors
         print("OAuthError:", e)
-        # Clear the stored state on error to prevent reuse
-        request.session.pop('oauth_state', None)
         return RedirectResponse(url='/login')  # Redirect to login page or handle error as needed
 
 # Public route

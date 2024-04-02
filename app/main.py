@@ -13,7 +13,7 @@ from starlette.responses import RedirectResponse
 # Create the APP
 app = FastAPI()
 
-# OAuth settings
+# OAuth settings in Google CLoud COnsole Screen imder API and Services > Credentials
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID') or None
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET') or None
 if GOOGLE_CLIENT_ID is None or GOOGLE_CLIENT_SECRET is None:

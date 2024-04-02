@@ -33,19 +33,19 @@ jobs:
           docker build --build-arg GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
                        --build-arg GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
                        --build-arg SECRET=${{ secrets.SECRET }} \
-                      -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fast_gauth:${{ github.sha }} .
+                      -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fastapi-auth:${{ github.sha }} .
 
       - name: Authenticate Docker to Google Container Registry
         run: gcloud auth configure-docker
 
       - name: Push Docker image to Google Container Registry
         run: |
-          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/fast_gauth:${{ github.sha }}
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/fastapi-auth:${{ github.sha }}
 
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy fast_gauth \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/fast_gauth:${{ github.sha }} \
+          gcloud run deploy fastapi-auth \
+            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/fastapi-auth:${{ github.sha }} \
             --region us-central1 \
             --port 7000 \
             --allow-unauthenticated  \

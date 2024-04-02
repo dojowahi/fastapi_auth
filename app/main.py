@@ -60,9 +60,19 @@ async def login(request: Request):
 @app.route('/auth')
 async def auth(request: Request):
     try:
+        # Retrieve the access token
         access_token = await oauth.google.authorize_access_token(request)
-    except OAuthError:
+
+        # Print or log the access token to verify its contents
+        print("Access Token:", access_token)
+
+        # Attempt to parse the ID token
+        user_data = await oauth.google.parse_id_token(request, access_token)
+
+        # If parsing is successful, store user data in session and redirect
+        request.session['user'] = dict(user_data)
         return RedirectResponse(url='/')
-    user_data = await oauth.google.parse_id_token(request, access_token)
-    request.session['user'] = dict(user_data)
-    return RedirectResponse(url='/')
+
+    except OAuthError:
+        # Handle OAuth errors (e.g., authorization failure)
+        return RedirectResponse(url='/')
